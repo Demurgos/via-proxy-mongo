@@ -62,15 +62,15 @@ export class MongoProxy implements Proxy {
 		return this.getCollection()
 			.then((coll: mongodb.Collection) => {
         let cursor: mongodb.Cursor = coll.find(query);
-        return <Cursor> cursor;
+        return <any> cursor;
 			});
   }
 
   readById (id: string, options?: ReadOptions): Promise<Object> {
 		return this
       .read({_id: asObjectID(id)})
-      .then((cursor: mongodb.Cursor) => {
-        return cursor.limit(1).next();
+      .then((cursor: Cursor) => {
+        return (<mongodb.Cursor> <any> cursor).limit(1).next();
       })
       .then((doc: Object) => {
         if (doc === null) {
@@ -119,12 +119,12 @@ export function viaToMongoUpdate (viaUpdate: Object): Promise<Object> {
   return Promise.resolve({"$set": viaUpdate});
 }
 
-export function asObjectID(id: string): mongodb.ObjectID {
+export function asObjectID(id: string | mongodb.ObjectID): mongodb.ObjectID {
   if (id instanceof mongodb.ObjectID) {
     return <mongodb.ObjectID> id;
   }
-  if (!mongodb.ObjectID.isValid(id)) {
+  if (!mongodb.ObjectID.isValid(<string> id)) {
     throw new Error("Invalid id");
   }
-  return new mongodb.ObjectID(id);
+  return new mongodb.ObjectID(<string> id);
 }

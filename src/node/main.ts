@@ -1,3 +1,1 @@
-import {Model} from "../core/model";
-
-new Model();
+export * from "../core/mongo-proxy";
