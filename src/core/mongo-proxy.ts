@@ -2,11 +2,11 @@ import * as Promise from 'bluebird';
 import * as _ from 'lodash';
 
 import * as mongodb from "mongodb";
-import {Proxy, ViaSchema, Cursor} from "./interfaces";
-import {ReadOptions, UpdateOptions, UpdateOneOptions} from "./interfaces";
+import {Proxy, ViaSchema, Cursor} from "via-core";
+import {ReadOptions, UpdateOptions, UpdateOneOptions} from "via-core";
 
-const TARGET = 'mongo';
-const FORMAT = 'bson';
+const TARGET: string = "mongo";
+const FORMAT: string = "bson";
 
 interface QueryCreate{}
 interface QueryRead{}
@@ -19,9 +19,9 @@ interface ViaMinModel {
   _updated: any;
 }
 
-export class MongoProxy {
-	format = FORMAT;
-  target = TARGET;
+export class MongoProxy implements Proxy {
+	format: string = FORMAT;
+  target: string = TARGET;
 
   db: mongodb.Db = null;
   collectionName: string;
@@ -58,17 +58,17 @@ export class MongoProxy {
       });
   }
 
-  read (query: Object, options?: ReadOptions): Promise<mongodb.Cursor> {
+  read (query: Object, options?: ReadOptions): Promise<Cursor> {
 		return this.getCollection()
 			.then((coll: mongodb.Collection) => {
         let cursor: mongodb.Cursor = coll.find(query);
-        return cursor;
+        return <Cursor> cursor;
 			});
   }
 
-  readById (id: mongodb.ObjectID): Promise<Object> {
+  readById (id: string, options?: ReadOptions): Promise<Object> {
 		return this
-      .read({_id: id})
+      .read({_id: asObjectID(id)})
       .then((cursor: mongodb.Cursor) => {
         return cursor.limit(1).next();
       })
@@ -93,7 +93,7 @@ export class MongoProxy {
   updateById (id: string, rev: string, update: Object, options?: UpdateOneOptions): Promise<any> {
     return this.getCollection()
       .then((coll: mongodb.Collection) => {
-        return coll.updateOne({_id: id, _rev: rev}, update, options);
+        return coll.updateOne({_id: asObjectID(id), _rev: rev}, update, options);
       })
       .then((wor: mongodb.UpdateWriteOpResult) => {
         if (!wor.matchedCount) {
