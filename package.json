@@ -1,11 +1,11 @@
 {
   "name": "via-proxy-mongo",
   "version": "0.0.0",
-  "description": "Document oriented models",
+  "description": "A proxy to query Mongo databases",
   "main": "dist/node/node/main.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/demurgos/via-type.git"
+    "url": "git://github.com/demurgos/via-proxy-mongo.git"
   },
   "scripts": {
     "test": "gulp test",
