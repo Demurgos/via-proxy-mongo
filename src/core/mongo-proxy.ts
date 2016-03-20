@@ -54,6 +54,7 @@ export class MongoProxy implements Proxy {
         if (!doc._id) {
           return Promise.reject(new Error("Result does not expose _id"));
         }
+        doc._id = (<mongodb.ObjectID>doc._id).toHexString();
         return doc;
       });
   }
