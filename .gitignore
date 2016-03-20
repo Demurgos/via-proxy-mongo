@@ -12,6 +12,9 @@ jspm_packages
 build
 coverage
 
+### Data ###
+db
+
 ### Temporary files ###
 # Temporary directory
 tmp

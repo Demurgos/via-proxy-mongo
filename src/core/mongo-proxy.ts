@@ -80,21 +80,27 @@ export class MongoProxy implements Proxy {
       });
   }
 
-  update (filter: Document, update: Object, options?: UpdateOptions): Promise<any> {
-    return this.getCollection()
-      .then((coll: mongodb.Collection) => {
-        return coll.updateMany(filter, update, options);
-      })
+  update (filter: Document, diff: Object, options?: UpdateOptions): Promise<any> {
+    return Promise.join(
+        this.getCollection(),
+        diffToMongoUpdate(diff),
+        (coll: mongodb.Collection, update: Object) => {
+          return coll.updateMany(filter, update, options);
+        }
+      )
       .then((wor: mongodb.UpdateWriteOpResult) => {
         return {updatedCount: wor.modifiedCount};
       });
   }
 
-  updateById (id: string, rev: string, update: Object, options?: UpdateOneOptions): Promise<any> {
-    return this.getCollection()
-      .then((coll: mongodb.Collection) => {
-        return coll.updateOne({_id: asObjectID(id), _rev: rev}, update, options);
-      })
+  updateById (id: string, rev: string, diff: Object, options?: UpdateOneOptions): Promise<any> {
+    return Promise.join(
+        this.getCollection(),
+        diffToMongoUpdate(diff),
+        (coll: mongodb.Collection, update: Object) => {
+          return coll.updateOne({_id: asObjectID(id), _rev: rev}, update, options);
+        }
+      )
       .then((wor: mongodb.UpdateWriteOpResult) => {
         if (!wor.matchedCount) {
           return Promise.reject(new Error("No match"));
@@ -115,8 +121,8 @@ export class MongoProxy implements Proxy {
   }
 }
 
-export function viaToMongoUpdate (viaUpdate: Object): Promise<Object> {
-  return Promise.resolve({"$set": viaUpdate});
+export function diffToMongoUpdate (diff: Object): Promise<Object> {
+  return Promise.resolve({"$set": diff});
 }
 
 export function asObjectID(id: string | mongodb.ObjectID): mongodb.ObjectID {
