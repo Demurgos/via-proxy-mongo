@@ -44,4 +44,8 @@ describe("MongoProxy", function(){
       })
   });
 
+  after("Close connection", function(){
+    return db.close();
+  });
+
 });
