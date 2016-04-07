@@ -1,5 +1,5 @@
-import * as Promise from 'bluebird';
-import * as _ from 'lodash';
+import * as Promise from "bluebird";
+import * as _ from "lodash";
 
 import * as mongodb from "mongodb";
 import {Proxy, ViaSchema, Cursor} from "via-core";
@@ -8,15 +8,25 @@ import {ReadOptions, UpdateOptions, UpdateOneOptions} from "via-core";
 const TARGET: string = "mongo";
 const FORMAT: string = "bson";
 
-interface QueryCreate{}
-interface QueryRead{}
-interface bsonData{[key:string]: any}
+interface QueryCreate {}
+interface QueryRead {}
+interface bsonData {
+  [key: string]: any;
+}
 
 interface ViaMinModel {
   _id: any;
   _rev: any;
   _created: any;
   _updated: any;
+}
+
+function stringifyId<T extends ViaMinModel>(doc: T): T {
+  if (!doc._id) {
+    throw new Error("Result does not expose _id");
+  }
+  doc._id = (<mongodb.ObjectID> doc._id).toHexString();
+  return doc;
 }
 
 export class MongoProxy implements Proxy {
@@ -26,7 +36,7 @@ export class MongoProxy implements Proxy {
   db: mongodb.Db = null;
   collectionName: string;
 
-  constructor (db: mongodb.Db, collectionName:string) {
+  constructor (db: mongodb.Db, collectionName: string) {
     this.db = db;
     this.collectionName = collectionName;
   }
@@ -51,11 +61,7 @@ export class MongoProxy implements Proxy {
           return Promise.reject(new Error("Unable to insert"));
         }
         let doc: ViaMinModel = wor.ops[0];
-        if (!doc._id) {
-          return Promise.reject(new Error("Result does not expose _id"));
-        }
-        doc._id = (<mongodb.ObjectID>doc._id).toHexString();
-        return doc;
+        return stringifyId(doc);
       });
   }
 
@@ -63,6 +69,7 @@ export class MongoProxy implements Proxy {
 		return this.getCollection()
 			.then((coll: mongodb.Collection) => {
         let cursor: mongodb.Cursor = coll.find(query);
+        cursor.map(stringifyId);
         return <any> cursor;
 			});
   }
@@ -82,7 +89,8 @@ export class MongoProxy implements Proxy {
   }
 
   update (filter: Document, diff: Object, options?: UpdateOptions): Promise<any> {
-    return Promise.join(
+    return Promise
+      .join(
         this.getCollection(),
         diffToMongoUpdate(diff),
         (coll: mongodb.Collection, update: Object) => {
@@ -95,7 +103,8 @@ export class MongoProxy implements Proxy {
   }
 
   updateById (id: string, rev: string, diff: Object, options?: UpdateOneOptions): Promise<any> {
-    return Promise.join(
+    return Promise
+      .join(
         this.getCollection(),
         diffToMongoUpdate(diff),
         (coll: mongodb.Collection, update: Object) => {

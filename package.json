@@ -34,6 +34,6 @@
   "dependencies": {
     "bluebird": "^3.2.1",
     "lodash": "^4.0.0",
-    "via-core": "^0.1.2"
+    "via-core": "^0.1.3"
   }
 }
