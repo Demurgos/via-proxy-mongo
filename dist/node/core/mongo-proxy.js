@@ -1,8 +1,15 @@
 "use strict";
-var Promise = require('bluebird');
+var Promise = require("bluebird");
 var mongodb = require("mongodb");
 var TARGET = "mongo";
 var FORMAT = "bson";
+function stringifyId(doc) {
+    if (!doc._id) {
+        throw new Error("Result does not expose _id");
+    }
+    doc._id = doc._id.toHexString();
+    return doc;
+}
 var MongoProxy = (function () {
     function MongoProxy(db, collectionName) {
         this.format = FORMAT;
@@ -29,16 +36,14 @@ var MongoProxy = (function () {
                 return Promise.reject(new Error("Unable to insert"));
             }
             var doc = wor.ops[0];
-            if (!doc._id) {
-                return Promise.reject(new Error("Result does not expose _id"));
-            }
-            return doc;
+            return stringifyId(doc);
         });
     };
     MongoProxy.prototype.read = function (query, options) {
         return this.getCollection()
             .then(function (coll) {
             var cursor = coll.find(query);
+            cursor.map(stringifyId);
             return cursor;
         });
     };
@@ -55,18 +60,18 @@ var MongoProxy = (function () {
             return doc;
         });
     };
-    MongoProxy.prototype.update = function (filter, update, options) {
-        return this.getCollection()
-            .then(function (coll) {
+    MongoProxy.prototype.update = function (filter, updateDoc, options) {
+        return Promise
+            .join(this.getCollection(), updateDoc, function (coll, update) {
             return coll.updateMany(filter, update, options);
         })
             .then(function (wor) {
             return { updatedCount: wor.modifiedCount };
         });
     };
-    MongoProxy.prototype.updateById = function (id, rev, update, options) {
-        return this.getCollection()
-            .then(function (coll) {
+    MongoProxy.prototype.updateById = function (id, rev, updateDoc, options) {
+        return Promise
+            .join(this.getCollection(), updateDoc, function (coll, update) {
             return coll.updateOne({ _id: asObjectID(id), _rev: rev }, update, options);
         })
             .then(function (wor) {
@@ -88,10 +93,6 @@ var MongoProxy = (function () {
     return MongoProxy;
 }());
 exports.MongoProxy = MongoProxy;
-function viaToMongoUpdate(viaUpdate) {
-    return Promise.resolve({ "$set": viaUpdate });
-}
-exports.viaToMongoUpdate = viaToMongoUpdate;
 function asObjectID(id) {
     if (id instanceof mongodb.ObjectID) {
         return id;

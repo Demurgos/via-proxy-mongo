@@ -1,4 +1,4 @@
-import * as Promise from 'bluebird';
+import * as Promise from "bluebird";
 import * as mongodb from "mongodb";
 import { Proxy, ViaSchema, Cursor } from "via-core";
 import { ReadOptions, UpdateOptions, UpdateOneOptions } from "via-core";
@@ -12,10 +12,9 @@ export declare class MongoProxy implements Proxy {
     create(data: Object): Promise<Object>;
     read(query: Object, options?: ReadOptions): Promise<Cursor>;
     readById(id: string, options?: ReadOptions): Promise<Object>;
-    update(filter: Document, update: Object, options?: UpdateOptions): Promise<any>;
-    updateById(id: string, rev: string, update: Object, options?: UpdateOneOptions): Promise<any>;
+    update(filter: Object, updateDoc: Object, options?: UpdateOptions): Promise<any>;
+    updateById(id: string, rev: string, updateDoc: Object, options?: UpdateOneOptions): Promise<any>;
     delete(): Promise<any>;
     getCollection(): Promise<mongodb.Collection>;
 }
-export declare function viaToMongoUpdate(viaUpdate: Object): Promise<Object>;
 export declare function asObjectID(id: string | mongodb.ObjectID): mongodb.ObjectID;

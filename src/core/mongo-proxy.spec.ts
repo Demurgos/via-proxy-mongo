@@ -86,6 +86,36 @@ describe("MongoProxy", function(){
       });
   });
 
+  it("#update", function() {
+    let proxy: MongoProxy = new MongoProxy(db, COLLECTION_NAME);
+    let doc = {
+      name: "Pluto",
+      type: "planet"
+    };
+
+    return proxy
+      .create(doc)
+      .then((stored: any) => {
+        let _id = stored._id;
+
+        return proxy
+          .update(
+            {
+              name: "Pluto"
+            },
+            {
+              $set: {
+                type: "dwarf-planet" // :'(
+              }
+            }
+          )
+          .then((updateResult: any) => {
+            assert.property(updateResult, "updatedCount");
+            assert.strictEqual(updateResult.updatedCount, 1);
+          })
+      });
+  });
+
   after("Close connection", function(){
     return db.close();
   });

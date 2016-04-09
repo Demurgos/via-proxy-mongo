@@ -88,11 +88,11 @@ export class MongoProxy implements Proxy {
       });
   }
 
-  update (filter: Document, diff: Object, options?: UpdateOptions): Promise<any> {
+  update (filter: Object, updateDoc: Object, options?: UpdateOptions): Promise<any> {
     return Promise
       .join(
         this.getCollection(),
-        diffToMongoUpdate(diff),
+        updateDoc,
         (coll: mongodb.Collection, update: Object) => {
           return coll.updateMany(filter, update, options);
         }
@@ -102,11 +102,11 @@ export class MongoProxy implements Proxy {
       });
   }
 
-  updateById (id: string, rev: string, diff: Object, options?: UpdateOneOptions): Promise<any> {
+  updateById (id: string, rev: string, updateDoc: Object, options?: UpdateOneOptions): Promise<any> {
     return Promise
       .join(
         this.getCollection(),
-        diffToMongoUpdate(diff),
+        updateDoc,
         (coll: mongodb.Collection, update: Object) => {
           return coll.updateOne({_id: asObjectID(id), _rev: rev}, update, options);
         }
@@ -129,10 +129,6 @@ export class MongoProxy implements Proxy {
   getCollection(): Promise<mongodb.Collection> {
     return Promise.resolve(this.db.collection(this.collectionName));
   }
-}
-
-export function diffToMongoUpdate (diff: Object): Promise<Object> {
-  return Promise.resolve({"$set": diff});
 }
 
 export function asObjectID(id: string | mongodb.ObjectID): mongodb.ObjectID {
