@@ -9,7 +9,6 @@
   },
   "scripts": {
     "test": "gulp test",
-    "postinstall": "gulp install.noNpm",
     "db": "mongod --storageEngine wiredTiger --dbpath ./db --port 27017"
   },
   "keywords": [
