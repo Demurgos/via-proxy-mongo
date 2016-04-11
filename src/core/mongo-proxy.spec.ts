@@ -116,6 +116,22 @@ describe("MongoProxy", function(){
       });
   });
 
+  it("model.create example", function() {
+    let proxy: MongoProxy = new MongoProxy(db, COLLECTION_NAME);
+    let doc = {
+      "_rev": "1",
+      "_created": new Date("2016-04-11T11:38:10.970Z"),
+      "_tested": new Date("2016-04-11T11:38:10.970Z"),
+      "_type": "account",
+      "login": "LOGIN",
+      "password": "PASSWORD",
+      "_updated": new Date("2016-04-11T11:38:10.970Z")
+    };
+
+    return proxy
+      .create(doc);
+  });
+
   after("Close connection", function(){
     return db.close();
   });
