@@ -14,12 +14,18 @@ var MongoProxy = (function () {
     function MongoProxy(db, collectionName) {
         this.format = FORMAT;
         this.target = TARGET;
+        this.dbPromise = null;
         this.db = null;
-        this.db = db;
+        if (db instanceof mongodb.Db) {
+            this.db = db;
+        }
+        else {
+            this.dbPromise = db;
+        }
         this.collectionName = collectionName;
     }
     MongoProxy.prototype.build = function (schema) {
-        return Promise.resolve();
+        return Promise.resolve(null);
     };
     MongoProxy.prototype.create = function (data) {
         var date = new Date();
@@ -87,8 +93,21 @@ var MongoProxy = (function () {
     MongoProxy.prototype.delete = function () {
         return Promise.resolve();
     };
+    MongoProxy.prototype.getDatabase = function () {
+        var _this = this;
+        if (this.dbPromise === null) {
+            return Promise.resolve(this.db);
+        }
+        return Promise
+            .resolve(this.dbPromise)
+            .tap(function (db) {
+            _this.dbPromise = null;
+            _this.db = db;
+        });
+    };
     MongoProxy.prototype.getCollection = function () {
-        return Promise.resolve(this.db.collection(this.collectionName));
+        var _this = this;
+        return this.getDatabase().then(function (db) { return db.collection(_this.collectionName); });
     };
     return MongoProxy;
 }());

@@ -33,16 +33,21 @@ export class MongoProxy implements Proxy {
 	format: string = FORMAT;
   target: string = TARGET;
 
+  dbPromise: Promise.Thenable<mongodb.Db> = null;
   db: mongodb.Db = null;
   collectionName: string;
 
-  constructor (db: mongodb.Db, collectionName: string) {
-    this.db = db;
+  constructor (db: mongodb.Db | Promise.Thenable<mongodb.Db>, collectionName: string) {
+    if (db instanceof mongodb.Db) {
+      this.db = db;
+    } else {
+      this.dbPromise = <Promise<mongodb.Db>> db;
+    }
     this.collectionName = collectionName;
   }
 
-  build(schema: ViaSchema): Promise<void>{
-    return Promise.resolve();
+  build(schema: ViaSchema): Promise<any>{
+    return Promise.resolve(null);
   }
 
   create (data: Object): Promise<Object> {
@@ -126,8 +131,21 @@ export class MongoProxy implements Proxy {
     return Promise.resolve();
   }
 
+  getDatabase(): Promise<mongodb.Db> {
+    if (this.dbPromise === null) {
+      return Promise.resolve(this.db);
+    }
+
+    return Promise
+      .resolve(this.dbPromise)
+      .tap((db: mongodb.Db) => {
+        this.dbPromise = null;
+        this.db = db;
+      });
+  }
+
   getCollection(): Promise<mongodb.Collection> {
-    return Promise.resolve(this.db.collection(this.collectionName));
+    return this.getDatabase().then(db => db.collection(this.collectionName));
   }
 }
 
