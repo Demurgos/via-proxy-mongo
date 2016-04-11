@@ -1,6 +1,6 @@
 {
   "name": "via-proxy-mongo",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "A proxy to query Mongo databases",
   "main": "dist/node/node/main.js",
   "repository": {
