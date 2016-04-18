@@ -7,8 +7,9 @@ function stringifyId(doc) {
     if (!doc._id) {
         throw new Error("Result does not expose _id");
     }
-    doc._id = doc._id.toHexString();
-    return doc;
+    var res = doc;
+    res._id = doc._id.toHexString();
+    return res;
 }
 var MongoProxy = (function () {
     function MongoProxy(db, collectionName) {

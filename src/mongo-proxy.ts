@@ -2,30 +2,39 @@ import * as Promise from "bluebird";
 import * as _ from "lodash";
 
 import * as mongodb from "mongodb";
-import {schema, proxy} from "via-core";
+import {schema, proxy, utils} from "via-core";
 
 const TARGET: string = "mongo";
 const FORMAT: string = "bson";
 
 interface QueryCreate {}
 interface QueryRead {}
-interface bsonData {
-  [key: string]: any;
-}
+type bsonData = utils.Document;
 
+// TODO: define in via-core
 interface ViaMinModel {
-  _id: any;
-  _rev: any;
-  _created: any;
-  _updated: any;
+  _id: string;
+  _name: string;
+  _rev: string;
+  _created: Date;
+  _updated: Date;
 }
 
-function stringifyId<T extends ViaMinModel>(doc: T): T {
+interface DbViaMinModel {
+  _id: mongodb.ObjectID;
+  _name: string;
+  _rev: string;
+  _created: Date;
+  _updated: Date;
+}
+
+function stringifyId<T extends DbViaMinModel>(doc: T): ViaMinModel {
   if (!doc._id) {
     throw new Error("Result does not expose _id");
   }
-  doc._id = (<mongodb.ObjectID> doc._id).toHexString();
-  return doc;
+  let res: ViaMinModel = <any> doc;
+  res._id = doc._id.toHexString();
+  return res;
 }
 
 export class MongoProxy implements proxy.Proxy {
@@ -64,7 +73,7 @@ export class MongoProxy implements proxy.Proxy {
         if (!wor.insertedCount) {
           return Promise.reject(new Error("Unable to insert"));
         }
-        let doc: ViaMinModel = wor.ops[0];
+        let doc: DbViaMinModel = wor.ops[0];
         return stringifyId(doc);
       });
   }
