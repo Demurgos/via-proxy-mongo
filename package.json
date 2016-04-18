@@ -2,7 +2,7 @@
   "name": "via-proxy-mongo",
   "version": "0.2.3",
   "description": "A proxy to query Mongo databases",
-  "main": "dist/node/node/main.js",
+  "main": "dist/node/main.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/demurgos/via-proxy-mongo.git"
@@ -21,7 +21,7 @@
     "gulp": "^3.9.0",
     "mongodb": "^2.1.7",
     "typescript": "^1.8.0-dev.20160125",
-    "via-build-tools": "^0.7.6"
+    "via-build-tools": "^0.8.2"
   },
   "jspm": {
     "configFile": "systemjs.config.js",
