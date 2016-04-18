@@ -2,7 +2,7 @@ import * as Promise from "bluebird";
 import * as mongodb from "mongodb";
 import {MongoProxy} from "./mongo-proxy";
 import {assert} from "chai";
-import {Cursor} from "via-core";
+import {proxy} from "via-core";
 
 const COLLECTION_NAME: string = "test";
 
@@ -67,7 +67,7 @@ describe("MongoProxy", function(){
 
         return proxy
           .read({language: "js"})
-          .then((readResult: Cursor) => {
+          .then((readResult: proxy.Cursor) => {
             return readResult.toArray();
           })
           .then((readResult: any[]) => {

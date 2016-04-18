@@ -2,8 +2,7 @@ import * as Promise from "bluebird";
 import * as _ from "lodash";
 
 import * as mongodb from "mongodb";
-import {Proxy, ViaSchema, Cursor} from "via-core";
-import {ReadOptions, UpdateOptions, UpdateOneOptions} from "via-core";
+import {schema, proxy} from "via-core";
 
 const TARGET: string = "mongo";
 const FORMAT: string = "bson";
@@ -29,7 +28,7 @@ function stringifyId<T extends ViaMinModel>(doc: T): T {
   return doc;
 }
 
-export class MongoProxy implements Proxy {
+export class MongoProxy implements proxy.Proxy {
 	format: string = FORMAT;
   target: string = TARGET;
 
@@ -46,7 +45,7 @@ export class MongoProxy implements Proxy {
     this.collectionName = collectionName;
   }
 
-  build(schema: ViaSchema): Promise<any>{
+  build(schema: schema.ViaModelSchema): Promise<any>{
     return Promise.resolve(null);
   }
 
@@ -70,7 +69,7 @@ export class MongoProxy implements Proxy {
       });
   }
 
-  read (query: Object, options?: ReadOptions): Promise<Cursor> {
+  read (query: Object, options?: proxy.ReadOptions): Promise<proxy.Cursor> {
 		return this.getCollection()
 			.then((coll: mongodb.Collection) => {
         let cursor: mongodb.Cursor = coll.find(query);
@@ -79,10 +78,10 @@ export class MongoProxy implements Proxy {
 			});
   }
 
-  readById (id: string, options?: ReadOptions): Promise<Object> {
+  readById (id: string, options?: proxy.ReadOptions): Promise<Object> {
 		return this
       .read({_id: asObjectID(id)})
-      .then((cursor: Cursor) => {
+      .then((cursor: proxy.Cursor) => {
         return (<mongodb.Cursor> <any> cursor).limit(1).next();
       })
       .then((doc: Object) => {
@@ -93,7 +92,7 @@ export class MongoProxy implements Proxy {
       });
   }
 
-  update (filter: Object, updateDoc: Object, options?: UpdateOptions): Promise<any> {
+  update (filter: Object, updateDoc: Object, options?: proxy.UpdateOptions): Promise<any> {
     return Promise
       .join(
         this.getCollection(),
@@ -107,7 +106,7 @@ export class MongoProxy implements Proxy {
       });
   }
 
-  updateById (id: string, rev: string, updateDoc: Object, options?: UpdateOneOptions): Promise<any> {
+  updateById (id: string, rev: string, updateDoc: Object, options?: proxy.UpdateOneOptions): Promise<any> {
     return Promise
       .join(
         this.getCollection(),
