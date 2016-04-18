@@ -2,13 +2,13 @@
   "name": "via-proxy-mongo",
   "dependencies": {
     "bluebird": "registry:npm/bluebird#3.3.4+20160411163813",
-    "lodash": "registry:npm/lodash#4.0.0+20160412191219",
+    "lodash": "registry:npm/lodash#4.0.0+20160416211519",
     "mongodb": "registry:npm/mongodb#2.1.0+20160329101818",
     "via-core": "npm:via-core"
   },
   "ambientDependencies": {
     "chai": "registry:dt/chai#3.4.0+20160317120654",
     "mocha": "registry:dt/mocha#2.2.5+20160317120654",
-    "node": "registry:dt/node#4.0.0+20160330064709"
+    "node": "registry:dt/node#4.0.0+20160412142033"
   }
 }
